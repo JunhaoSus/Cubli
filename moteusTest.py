@@ -8,7 +8,7 @@ async def run():
     # Create a Stream for low-level commands
     stream = moteus.Stream(controller)
     
-    constant_velocity = 20      # Desired constant velocity (adjust as needed)
+    constant_velocity = 50      # Desired constant velocity (adjust as needed)
     maximum_torque = 0.035       # Maximum allowed torque (in Nm)
 
     print("Spinning motor at constant velocity. Press Ctrl+C to stop.")

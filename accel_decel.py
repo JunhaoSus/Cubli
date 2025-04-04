@@ -18,7 +18,7 @@ async def run():
         while True:
             # Phase 1: Accelerate forward (high velocity) over 1.0 second.
             phase_duration = 1
-            target_velocity_forward = 20  # High forward velocity (rad/s)
+            target_velocity_forward = 50  # High forward velocity Hz
             start_time = asyncio.get_event_loop().time()
             while (t := asyncio.get_event_loop().time() - start_time) < phase_duration:
                 desired_velocity = (t / phase_duration) * target_velocity_forward
