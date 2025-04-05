@@ -1,0 +1,2 @@
+[console_scripts]
+tview = moteus_gui.tview:main

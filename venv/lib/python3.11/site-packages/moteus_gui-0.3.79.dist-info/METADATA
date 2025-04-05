@@ -1,0 +1,34 @@
+Metadata-Version: 2.1
+Name: moteus-gui
+Version: 0.3.79
+Summary: moteus brushless controller graphical user interfaces
+Home-page: https://github.com/mjbots/moteus
+Author: mjbots Robotic Systems
+Author-email: info@mjbots.com
+Keywords: moteus
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.7, <4
+Description-Content-Type: text/markdown
+Requires-Dist: PySide6 >=6.8
+Requires-Dist: asyncqt >=0.8
+Requires-Dist: matplotlib >=3.9
+Requires-Dist: moteus >=0.3.74
+Requires-Dist: qtconsole >=5.6
+Requires-Dist: qtpy >=2.0.1
+Requires-Dist: scipy >=1.14
+Requires-Dist: msvc-runtime ; platform_system == "Windows" and python_version < "3.12"
+
+# moteus GUI tools #
+
+This package contains the `tview` graphical tool for interacting with
+moteus controllers.
+
+To install and run:
+
+```
+pip3 install moteus-gui
+python3 -m moteus_gui.tview
+```
