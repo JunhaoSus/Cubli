@@ -1,5 +1,6 @@
 import mpu6050
 import time
+import math
 
 # Create a new mpu6050 object
 mpu = mpu6050.mpu6050(0x68)
@@ -20,6 +21,13 @@ def read_sensor_data():
         axis: accelerometer_data[axis] + offsets[axis]
         for axis in accelerometer_data
     }
+
+    # determine angles
+    angles = {
+            axis: math.degrees(math.acos(calibrated_accel[axis] / 9.81)) 
+            if -1.0 <= calibrated_accel[axis] / 9.81 <= 1.0 else None
+            for axis in calibrated_accel
+        }
     
     # Read gyroscope values
     gyroscope_data = mpu.get_gyro_data()
@@ -27,14 +35,15 @@ def read_sensor_data():
     # Read temperature
     temperature = mpu.get_temp()
 
-    return calibrated_accel, gyroscope_data, temperature
+    return calibrated_accel, angles, gyroscope_data, temperature
 
 # Continuously read the sensor data
 while True:
-    calibrated_accel, gyroscope_data, temperature = read_sensor_data()
+    calibrated_accel, angles, gyroscope_data, temperature = read_sensor_data()
 
     # Print the sensor data
     print("Calibrated Accelerometer data:", calibrated_accel)
+    print("angles(degrees):", angles)
     print("Gyroscope data:", gyroscope_data)
     print("Temperature:", temperature)
 
