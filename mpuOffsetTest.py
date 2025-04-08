@@ -24,7 +24,7 @@ def read_sensor_data():
 
     # determine angles
     angles = {
-            axis: math.degrees(math.acos(calibrated_accel[axis] / 9.81)) 
+            axis: math.degrees(math.acos(calibrated_accel[axis] / 9.81)) - 90
             if -1.0 <= calibrated_accel[axis] / 9.81 <= 1.0 else None
             for axis in calibrated_accel
         }
@@ -32,20 +32,16 @@ def read_sensor_data():
     # Read gyroscope values
     gyroscope_data = mpu.get_gyro_data()
 
-    # Read temperature
-    temperature = mpu.get_temp()
-
-    return calibrated_accel, angles, gyroscope_data, temperature
+    return calibrated_accel, angles, gyroscope_data
 
 # Continuously read the sensor data
 while True:
-    calibrated_accel, angles, gyroscope_data, temperature = read_sensor_data()
+    calibrated_accel, angles, gyroscope_data = read_sensor_data()
 
     # Print the sensor data
     print("Calibrated Accelerometer data:", calibrated_accel)
     print("angles(degrees):", angles)
     print("Gyroscope data:", gyroscope_data)
-    print("Temperature:", temperature)
 
     # Wait for 1 second
     time.sleep(1)
