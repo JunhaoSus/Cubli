@@ -54,7 +54,7 @@ def read_angle_x():
     try:
         # Calculate y-axis angle from accelerometer data (convert from degrees to radians)
         # math.acos returns radians. Here we subtract pi/2 to shift the angle.
-        angle_y = math.acos(calibrated["y"] / 9.81) - (math.pi / 2)
+        angle_y = math.acos(calibrated["y"] / 9.81) - (math.pi/2)
     except Exception as e:
         print("Error in angle calculation:", e)
         angle_y = 0
@@ -105,9 +105,9 @@ async def run():
             # Send the torque command to the motor via the moteus controller.
             # The "set_position" call allows you to send a feedforward torque while ignoring position/velocity.
             await controller.set_position(
-                position = m.nan,          # Do not specify an absolute position
-                velocity = m.nan,          # Do not control velocity here
-                maximum_torque = m.nan,    # No explicit limit; you might want to add one
+                position = math.nan,          # Do not specify an absolute position
+                velocity = math.nan,          # Do not control velocity here
+                maximum_torque = math.nan,    # No explicit limit; you might want to add one
                 feedforward_torque = torque,
                 query = False              # No query needed on every iteration
             )
@@ -118,7 +118,7 @@ async def run():
     except KeyboardInterrupt:
         # On keyboard interrupt, safely command the motor to stop by setting velocity to 0.
         await controller.set_position(
-            position = m.nan,
+            position = math.nan,
             velocity = 0,
             query = False
         )
