@@ -29,7 +29,6 @@ wn = 4.76
 target_poles = [complex(-zeta*wn, wn*np.sqrt(1 - zeta**2)),
                 complex(-zeta*wn, -wn*np.sqrt(1 - zeta**2)),
                 -20]
-placed = ctrl.place(A, B, target_poles)
 K = ctrl.place(A, B, target_poles)
 
 # Closed-loop state-space system
@@ -39,8 +38,8 @@ sys_cl = ctrl.ss(A_cl, B, C_flipped, D)
 
 # === ZEROS AND POLES OF CLOSED-LOOP SYSTEM ===
 sys_tf = ctrl.ss2tf(A_cl, B, C_flipped, D)
-zeros = ctrl.zeros(sys_tf)
-poles = ctrl.poles(sys_tf)
+zeros = ctrl.zero(sys_tf)
+poles = ctrl.pole(sys_tf)
 print("Closed-loop Zeros:", zeros)
 print("Closed-loop Poles:", poles)
 
@@ -48,15 +47,19 @@ print("Closed-loop Poles:", poles)
 x = np.zeros((A.shape[0], 1))
 Ts = 0.015  # 100 Hz
 
-# === SENSOR FUNCTION ===
+# === SENSOR FUNCTION (with averaging 8 samples) ===
 def read_angle_x():
-    accel = mpu.get_accel_data()
-    calibrated = {axis: accel[axis] + offsets[axis] for axis in accel}
-    try:
-        angle_y = math.acos(calibrated["y"] / 9.81) - (math.pi/2)
-    except:
-        angle_y = 0
-    return angle_y
+    angles = []
+    for _ in range(8):
+        accel = mpu.get_accel_data()
+        calibrated = {axis: accel[axis] + offsets[axis] for axis in accel}
+        try:
+            angle_y = math.acos(calibrated["y"] / 9.81) - (math.pi/2)
+        except:
+            angle_y = 0
+        angles.append(angle_y)
+        time.sleep(0.001)  # ~1kHz IMU sampling
+    return sum(angles) / len(angles)
 
 # === REAL-TIME CONTROL LOOP ===
 async def run():
@@ -72,7 +75,7 @@ async def run():
             u = -K @ x
             u = u.item()
 
-            #Torque limiter (saturae to +\- 2 Nm)
+            # Torque limiter (saturate to +/- 1 Nm)
             u = max(min(u, 1), -1)
 
             print(f"Angle: {theta:f} rad | Torque: {-u:f} Nm")
