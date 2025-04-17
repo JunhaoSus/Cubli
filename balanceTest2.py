@@ -17,7 +17,11 @@ denG = [1, 0.2449, -43590, -11.75]
 G = ctrl.tf(numG, denG)
 
 # Convert to state-space (controllable canonical form)
-A, B, C, D = ctrl.tf2ss(numG, denG)
+sys_ss = ctrl.tf2ss(numG, denG)
+A = sys_ss.A
+B = sys_ss.B
+C = sys_ss.C
+D = sys_ss.D
 
 # === POLE PLACEMENT ===
 zeta = 0.7
@@ -26,7 +30,7 @@ target_poles = [complex(-zeta*wn, wn*np.sqrt(1 - zeta**2)),
                 complex(-zeta*wn, -wn*np.sqrt(1 - zeta**2)),
                 -20]
 placed = ctrl.place(A, B, target_poles)
-K = placed.gain_matrix
+K = ctrl.place(A, B, target_poles)
 
 # Closed-loop state-space system
 A_cl = A - B @ K
@@ -34,15 +38,15 @@ C_flipped = -C  # Correct for original negative gain
 sys_cl = ctrl.ss(A_cl, B, C_flipped, D)
 
 # === ZEROS AND POLES OF CLOSED-LOOP SYSTEM ===
-z, p, k = ctrl.ss2tf(A_cl, B, C_flipped, D)
-zeros = ctrl.zero(sys_cl)
-poles = ctrl.pole(sys_cl)
+sys_tf = ctrl.ss2tf(A_cl, B, C_flipped, D)
+zeros = ctrl.zeros(sys_tf)
+poles = ctrl.poles(sys_tf)
 print("Closed-loop Zeros:", zeros)
 print("Closed-loop Poles:", poles)
 
-# === STATE INITIALIZATION ===
+# === STATE and IMU INITIALIZATION ===
 x = np.zeros((A.shape[0], 1))
-Ts = 0.01  # 100 Hz
+Ts = 0.015  # 100 Hz
 
 # === SENSOR FUNCTION ===
 def read_angle_x():
@@ -67,13 +71,17 @@ async def run():
             x[0, 0] = theta
             u = -K @ x
             u = u.item()
-            print(f"Angle: {theta:.4f} rad | Torque: {u:.4f} Nm")
+
+            #Torque limiter (saturae to +\- 2 Nm)
+            u = max(min(u, 1), -1)
+
+            print(f"Angle: {theta:f} rad | Torque: {-u:f} Nm")
 
             await controller.set_position(
                 position = math.nan,
                 velocity = math.nan,
                 maximum_torque = math.nan,
-                feedforward_torque = u,
+                feedforward_torque = -u,
                 query = False
             )
             await asyncio.sleep(Ts)
